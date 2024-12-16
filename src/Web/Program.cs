@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using AutoPartsApp.Models;
 using AutoPartsApp.Context;
 using AutoPartsApp.Models.User;
+using AutoPartsApp.Models.Role;
 namespace AutoPartsApp
 {
     public class Program

@@ -1,0 +1,18 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div>
+    <form asp-controller="Account" asp-action="CreateRole">
+        <label>Username</label>
+        <input class="form-control" id="userName" name="userName" />
+        <label>Password</label>
+        <input class="form-control" id="password" name="password" />
+        <button class="btn btn-primary" type="submit">Sign in</button>
+    </form>
+</div>
+
+<div class="text-center">
+    <h1 class="display-4">Lista de Roles com Claims</h1>
+    
+</div>

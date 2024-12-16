@@ -11,14 +11,15 @@ namespace AutoPartsApp.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly AutoPartsAppContext _dbContext;
+        private readonly AutoPartsAppContext _context;
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
 
-        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager)
+        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager, AutoPartsAppContext context)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _context = context;
         }
 
         [HttpGet]
@@ -80,6 +81,23 @@ namespace AutoPartsApp.Controllers
             user.PasswordHash = hashedPassword;
 
             return await _userManager.CreateAsync(user);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Roles() 
+        {
+            var rolesWithClaims = _context.Roles
+                .Join(
+                    _context.RoleClaims,
+                    role => role.Id,
+                    claim => claim.RoleId,
+                    (role, claim) => new
+                    {
+                        Role = role,
+                        Claim = claim
+                    }
+                );
+            return View(rolesWithClaims); 
         }
 
         public IActionResult AccessDenied(string returnUrl = null)

@@ -26,6 +26,14 @@
 
   <ItemGroup>
     <Folder Include="Models\User\Response\" />
+    <Folder Include="Viewmodel\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="Views\Account\Roles.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>
