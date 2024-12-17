@@ -25,8 +25,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Migrations\" />
+    <Folder Include="Models\UserRole\" />
+    <Folder Include="Models\Role\Response\" />
+    <Folder Include="Models\Role\Request\" />
     <Folder Include="Models\User\Response\" />
-    <Folder Include="Viewmodel\" />
   </ItemGroup>
 
   <ItemGroup>

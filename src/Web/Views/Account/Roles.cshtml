@@ -1,18 +1,93 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@using AutoPartsApp.Viewmodel.Role
+@model IQueryable<RoleClaimViewmodel>
+
+@{
+    ViewData["Title"] = "Role Management";
 }
 
 <div>
     <form asp-controller="Account" asp-action="CreateRole">
-        <label>Username</label>
-        <input class="form-control" id="userName" name="userName" />
-        <label>Password</label>
-        <input class="form-control" id="password" name="password" />
-        <button class="btn btn-primary" type="submit">Sign in</button>
+        <label>Name</label>
+        <input class="form-control" id="name" name="name" />
+        <button class="btn btn-primary" type="submit">Add Role</button>
     </form>
 </div>
 
-<div class="text-center">
-    <h1 class="display-4">Lista de Roles com Claims</h1>
-    
-</div>
+@if (Model != null && Model.Any())
+{
+    <div class="text-center">
+        <h1 class="display-4">Lista de Roles com Claims</h1>
+        <ul class="list-group">
+            @foreach (var roleClaim in Model)
+            {
+                <li class="list-group-item">
+                    <!-- Role Name -->
+                    <h5>@roleClaim.Role.Name</h5>
+
+                    <!-- Button to toggle claims -->
+                    <button class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#claims-@roleClaim.Role.Id" aria-expanded="false" aria-controls="claims-@roleClaim.Role.Id">
+                        Show Claims
+                    </button>
+
+                    <!-- Dropdown for claims -->
+                    <div id="claims-@roleClaim.Role.Id" class="collapse">
+                        <ul class="list-group mt-2">
+                            @if (roleClaim.Claims.Any())
+                            {
+                                @foreach (var claim in roleClaim.Claims)
+                                {
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <!-- Claim details -->
+                                        <div>
+                                            <strong>Value:</strong> @claim.ClaimValue
+                                        </div>
+
+                                        <form asp-controller="Account" asp-action="EditClaim" method="post" class="d-inline">
+                                            <input type="hidden" name="claimType" value="@roleClaim.Role.NormalizedName" />
+                                            <input type="hidden" name="claimId" value="@claim.Id" />
+                                            <label for="claimValue-@claim.Id"><strong>Value:</strong></label>
+
+                                            <!-- Dropdown for Claim Values -->
+                                            <select id="claimValue-@claim.Id" name="claimValue" class="form-select form-select-sm" multiple>
+                                                <option value="READ" selected="@(claim.ClaimValue.Contains("READ") ? "selected" : null)">READ</option>
+                                                <option value="WRITE" selected="@(claim.ClaimValue.Contains("WRITE") ? "selected" : null)">WRITE</option>
+                                            </select>
+
+                                            <button class="btn btn-warning btn-sm mt-2" type="submit">Edit</button>
+                                        </form>
+                                    </li>
+                                }
+                            }
+                            else
+                            {
+                                <li class="list-group-item">
+                                    <form asp-controller="Account" asp-action="CreateClaim" method="post">
+                                        <input type="hidden" id="NewRoleClaim.Role.Id" name="NewRoleClaim.Role.Id" value="@roleClaim.Role.Id" />
+                                        <input type="hidden" id="NewRoleClaim.Role.Name" name="NewRoleClaim.Role.Name" value="@roleClaim.Role.Name" />
+                                        <input type="hidden" id="NewRoleClaim.Role.NormalizedName" name="NewRoleClaim.Role.NormalizedName" value="@roleClaim.Role.NormalizedName" />
+                                        <input type="hidden" id="NewRoleClaim.RoleClaim.RoleId" name="NewRoleClaim.RoleClaim.RoleId" value="@roleClaim.Role.Id" />
+
+                                        <label for="claimType-@roleClaim.Role.Id">Claim Type</label>
+                                        <input class="form-control mb-2" id="NewRoleClaim.RoleClaim.ClaimType" name="NewRoleClaim.RoleClaim.ClaimType" value="@roleClaim.Role.NormalizedName" readonly />
+                                        
+                                        <label for="claimValue-@roleClaim.Role.Id">Claim Value</label>
+                                        <select id="NewRoleClaim.RoleClaim.ClaimValue" name="NewRoleClaim.RoleClaim.ClaimValue" class="form-select form-select-sm" multiple>
+                                            <option value="READ">READ</option>
+                                            <option value="WRITE">WRITE</option>
+                                        </select>                                        
+                                        
+                                        <button class="btn btn-primary btn-sm" type="submit">Add Claim</button>
+                                    </form>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </li>
+            }
+        </ul>
+    </div>
+}
+else
+{
+    <p>No roles available.</p>
+}

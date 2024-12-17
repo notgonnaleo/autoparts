@@ -1,9 +1,8 @@
 ﻿using AutoPartsApp.Models.Role;
+using AutoPartsApp.Models.RoleClaim;
 using AutoPartsApp.Models.User;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using System.Reflection.Emit;
 
 namespace AutoPartsApp.Context;
 

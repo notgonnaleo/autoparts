@@ -1,6 +1,10 @@
 ﻿using AutoPartsApp.Context;
+using AutoPartsApp.Models.Role;
+using AutoPartsApp.Models.RoleClaim;
+using AutoPartsApp.Models.RoleClaim.Request;
 using AutoPartsApp.Models.User;
 using AutoPartsApp.Models.User.Request;
+using AutoPartsApp.Viewmodel.Role;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -87,17 +91,47 @@ namespace AutoPartsApp.Controllers
         public async Task<IActionResult> Roles() 
         {
             var rolesWithClaims = _context.Roles
-                .Join(
+                .GroupJoin(
                     _context.RoleClaims,
                     role => role.Id,
                     claim => claim.RoleId,
-                    (role, claim) => new
+                    (role, claims) => new RoleClaimViewmodel
                     {
                         Role = role,
-                        Claim = claim
+                        Claims = claims.Select(c => new AutoPartsApp.Models.RoleClaim.RoleClaim
+                        {
+                            Id = c.Id,
+                            RoleId = c.RoleId,
+                            ClaimType = c.ClaimType,
+                            ClaimValue = c.ClaimValue
+                        })
                     }
                 );
-            return View(rolesWithClaims); 
+            return View(rolesWithClaims);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateRole(Role newRole)
+        {
+            newRole.Id = Guid.NewGuid();
+            newRole.NormalizedName = newRole.Name.ToUpper();
+            newRole.ConcurrencyStamp = newRole.ConcurrencyStamp;
+            _context.Roles.Add(newRole);
+            _context.SaveChanges();
+            return RedirectToAction("Roles");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateClaim(NewRoleClaim newRoleClaim)
+        {
+            _context.RoleClaims.Add(new IdentityRoleClaim<Guid>()
+            {
+                ClaimType = newRoleClaim.Role.NormalizedName,
+                ClaimValue = newRoleClaim.RoleClaim.ClaimValue,
+                RoleId = newRoleClaim.Role.Id
+            });
+            _context.SaveChanges();
+            return RedirectToAction("Roles");
         }
 
         public IActionResult AccessDenied(string returnUrl = null)
