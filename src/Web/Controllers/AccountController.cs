@@ -205,9 +205,10 @@ namespace AutoPartsApp.Controllers
             return View();
         }
 
+        [HttpGet]
         public async Task<IActionResult> Logout()
         {
-            await HttpContext.SignOutAsync();
+            await _signInManager.SignOutAsync();
             return Redirect("/");
         }
     }
