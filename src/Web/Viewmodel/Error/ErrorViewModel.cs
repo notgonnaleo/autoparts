@@ -1,4 +1,4 @@
-namespace AutoPartsApp.Models
+namespace AutoPartsApp.Viewmodel.Error
 {
     public class ErrorViewModel
     {

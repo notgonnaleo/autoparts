@@ -1,6 +1,5 @@
 ﻿using AutoPartsApp.Context;
 using AutoPartsApp.Models.Role;
-using AutoPartsApp.Models.RoleClaim;
 using AutoPartsApp.Models.RoleClaim.Request;
 using AutoPartsApp.Models.User;
 using AutoPartsApp.Models.User.Request;
@@ -30,6 +29,7 @@ namespace AutoPartsApp.Controllers
         [HttpGet]
         public IActionResult Login(string returnUrl = null)
         {
+            TempData["warning"] = "Mensagem de warning!!";
             ViewData["ReturnUrl"] = returnUrl;
             return View();
         }
@@ -138,6 +138,7 @@ namespace AutoPartsApp.Controllers
         {
             if (userId == Guid.Empty || roleId == Guid.Empty)
             {
+                TempData["warning"] = "Mensagem de warning!!";
                 return BadRequest("User ID and Role ID must be provided.");
             }
 
@@ -158,12 +159,14 @@ namespace AutoPartsApp.Controllers
         {
             if (userId == Guid.Empty || roleId == Guid.Empty)
             {
+                TempData["warning"] = "Mensagem de warning!!";
                 return BadRequest("User ID and Role ID must be provided.");
             }
 
             var existingUserRole = _context.UserRoles.FirstOrDefault(ur => ur.UserId == userId);
             if (existingUserRole == null) 
             {
+                TempData["warning"] = "Mensagem de warning!!";
                 return NotFound("User role assignment not found.");
             }
             _context.UserRoles.Remove(existingUserRole);

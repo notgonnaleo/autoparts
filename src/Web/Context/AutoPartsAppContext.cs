@@ -1,5 +1,4 @@
 ﻿using AutoPartsApp.Models.Role;
-using AutoPartsApp.Models.RoleClaim;
 using AutoPartsApp.Models.User;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;

@@ -1,8 +1,6 @@
-﻿using AutoPartsApp.Models;
-using AutoPartsApp.Models.RoleClaim.Request;
+﻿using AutoPartsApp.Models.RoleClaim.Request;
 using AutoPartsApp.Models.User;
 using AutoPartsApp.Models.UserRole;
-using Microsoft.AspNetCore.Identity;
 
 namespace AutoPartsApp.Viewmodel.Role
 {
@@ -16,7 +14,7 @@ namespace AutoPartsApp.Viewmodel.Role
     public class RoleClaimViewmodel 
     {
         public IEnumerable<RoleAndClaims>? RoleAndClaims { get; set; }
-        public IEnumerable<IdentityUserRole<Guid>>? UserRoles { get; set; }
+        public IEnumerable<UserRole>? UserRoles { get; set; }
         public IEnumerable<User>? Users { get; set; }
     }
 
