@@ -1,5 +1,5 @@
 ﻿@using AutoPartsApp.Viewmodel.Role
-@model IQueryable<RoleClaimViewmodel>
+@model RoleClaimViewmodel
 
 @{
     ViewData["Title"] = "Role Management";
@@ -13,23 +13,19 @@
     </form>
 </div>
 
-@if (Model != null && Model.Any())
+@if (Model.RoleAndClaims != null && Model.RoleAndClaims.Any())
 {
     <div class="text-center">
         <h1 class="display-4">Lista de Roles com Claims</h1>
         <ul class="list-group">
-            @foreach (var roleClaim in Model)
+            @foreach (var roleClaim in Model.RoleAndClaims)
             {
                 <li class="list-group-item">
-                    <!-- Role Name -->
                     <h5>@roleClaim.Role.Name</h5>
-
-                    <!-- Button to toggle claims -->
                     <button class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#claims-@roleClaim.Role.Id" aria-expanded="false" aria-controls="claims-@roleClaim.Role.Id">
                         Show Claims
                     </button>
 
-                    <!-- Dropdown for claims -->
                     <div id="claims-@roleClaim.Role.Id" class="collapse">
                         <ul class="list-group mt-2">
                             @if (roleClaim.Claims.Any())
@@ -37,22 +33,15 @@
                                 @foreach (var claim in roleClaim.Claims)
                                 {
                                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                                        <!-- Claim details -->
                                         <div>
                                             <strong>Value:</strong> @claim.ClaimValue
                                         </div>
-
                                         <form asp-controller="Account" asp-action="EditClaim" method="post" class="d-inline">
-                                            <input type="hidden" name="claimType" value="@roleClaim.Role.NormalizedName" />
                                             <input type="hidden" name="claimId" value="@claim.Id" />
-                                            <label for="claimValue-@claim.Id"><strong>Value:</strong></label>
-
-                                            <!-- Dropdown for Claim Values -->
-                                            <select id="claimValue-@claim.Id" name="claimValue" class="form-select form-select-sm" multiple>
-                                                <option value="READ" selected="@(claim.ClaimValue.Contains("READ") ? "selected" : null)">READ</option>
-                                                <option value="WRITE" selected="@(claim.ClaimValue.Contains("WRITE") ? "selected" : null)">WRITE</option>
+                                            <select id="claimValue-@claim.Id" name="claimValue" class="form-select form-select-sm">
+                                                <option value="READ" selected="@(claim.ClaimValue == "READ" ? "selected" : null)">READ</option>
+                                                <option value="WRITE" selected="@(claim.ClaimValue == "WRITE" ? "selected" : null)">WRITE</option>
                                             </select>
-
                                             <button class="btn btn-warning btn-sm mt-2" type="submit">Edit</button>
                                         </form>
                                     </li>
@@ -62,20 +51,12 @@
                             {
                                 <li class="list-group-item">
                                     <form asp-controller="Account" asp-action="CreateClaim" method="post">
-                                        <input type="hidden" id="NewRoleClaim.Role.Id" name="NewRoleClaim.Role.Id" value="@roleClaim.Role.Id" />
-                                        <input type="hidden" id="NewRoleClaim.Role.Name" name="NewRoleClaim.Role.Name" value="@roleClaim.Role.Name" />
-                                        <input type="hidden" id="NewRoleClaim.Role.NormalizedName" name="NewRoleClaim.Role.NormalizedName" value="@roleClaim.Role.NormalizedName" />
-                                        <input type="hidden" id="NewRoleClaim.RoleClaim.RoleId" name="NewRoleClaim.RoleClaim.RoleId" value="@roleClaim.Role.Id" />
-
-                                        <label for="claimType-@roleClaim.Role.Id">Claim Type</label>
-                                        <input class="form-control mb-2" id="NewRoleClaim.RoleClaim.ClaimType" name="NewRoleClaim.RoleClaim.ClaimType" value="@roleClaim.Role.NormalizedName" readonly />
-                                        
+                                        <input type="hidden" name="RoleId" value="@roleClaim.Role.Id" />
                                         <label for="claimValue-@roleClaim.Role.Id">Claim Value</label>
-                                        <select id="NewRoleClaim.RoleClaim.ClaimValue" name="NewRoleClaim.RoleClaim.ClaimValue" class="form-select form-select-sm" multiple>
+                                        <select id="claimValue-@roleClaim.Role.Id" name="ClaimValue" class="form-select form-select-sm">
                                             <option value="READ">READ</option>
                                             <option value="WRITE">WRITE</option>
-                                        </select>                                        
-                                        
+                                        </select>
                                         <button class="btn btn-primary btn-sm" type="submit">Add Claim</button>
                                     </form>
                                 </li>
@@ -90,4 +71,67 @@
 else
 {
     <p>No roles available.</p>
+}
+
+@if (Model.UserRoles != null && Model.UserRoles.Any())
+{
+    <div class="text-center mt-5">
+        <h1 class="display-4">Usuarios e Roles</h1>
+        <ul class="list-group">
+            @foreach (var userRole in Model.UserRoles)
+            {
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <!-- User Name -->
+                    <div>
+                        <strong>Usuario:</strong> @Model.Users.FirstOrDefault(u => u.Id == userRole.UserId)?.UserName
+                    </div>
+
+                    <!-- Dropdown for Role -->
+                    <form asp-controller="Account" asp-action="UpdateUserRole" method="post" class="d-inline">
+                        <input type="hidden" name="UserId" value="@userRole.UserId" />
+
+                        <label for="userRole-@userRole.UserId">Role</label>
+                        <select id="userRole-@userRole.UserId" name="RoleId" class="form-select form-select-sm">
+                            @foreach (var role in Model.RoleAndClaims.Select(rc => rc.Role))
+                            {
+                                <option value="@role.Id" selected="@(role.Id == userRole.RoleId ? "selected" : null)">
+                                    @role.Name
+                                </option>
+                            }
+                        </select>
+                        <button class="btn btn-success btn-sm mt-2" type="submit">Update</button>
+                    </form>
+                </li>
+            }
+        </ul>
+    </div>
+}
+else
+{
+    <div class="text-center mt-4">
+        <h1 class="display-4">Assign Role to User</h1>
+        <form asp-controller="Account" asp-action="AssignRole" method="post" class="form-inline">
+            <div class="form-group mb-2">
+                <label for="userId" class="mr-2"><strong>User:</strong></label>
+                <select id="userId" name="userId" class="form-select">
+                    @foreach (var user in Model.Users.Where(u => !Model.UserRoles.Any(r => r.UserId == u.Id)))
+                    {
+                        <option value="@user.Id">@user.UserName</option>
+                    }
+                </select>
+            </div>
+
+            <div class="form-group mb-2 ml-3">
+                <label for="roleId" class="mr-2"><strong>Role:</strong></label>
+                <select id="roleId" name="roleId" class="form-select">
+                    @foreach (var role in Model.RoleAndClaims)
+                    {
+                        <option value="@role.Role.Id">@role.Role.Name</option>
+                    }
+                </select>
+            </div>
+
+            <button class="btn btn-primary btn-sm ml-3" type="submit">Assign Role</button>
+        </form>
+    </div>
 }

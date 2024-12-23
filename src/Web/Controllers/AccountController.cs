@@ -4,6 +4,7 @@ using AutoPartsApp.Models.RoleClaim;
 using AutoPartsApp.Models.RoleClaim.Request;
 using AutoPartsApp.Models.User;
 using AutoPartsApp.Models.User.Request;
+using AutoPartsApp.Models.UserRole;
 using AutoPartsApp.Viewmodel.Role;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -88,14 +89,15 @@ namespace AutoPartsApp.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Roles() 
+        public async Task<IActionResult> Roles()
         {
-            var rolesWithClaims = _context.Roles
+            // Retrieve roles and their claims
+            var roleClaims = _context.Roles
                 .GroupJoin(
                     _context.RoleClaims,
                     role => role.Id,
                     claim => claim.RoleId,
-                    (role, claims) => new RoleClaimViewmodel
+                    (role, claims) => new RoleAndClaims
                     {
                         Role = role,
                         Claims = claims.Select(c => new AutoPartsApp.Models.RoleClaim.RoleClaim
@@ -104,10 +106,74 @@ namespace AutoPartsApp.Controllers
                             RoleId = c.RoleId,
                             ClaimType = c.ClaimType,
                             ClaimValue = c.ClaimValue
-                        })
+                        }),
                     }
-                );
-            return View(rolesWithClaims);
+                ).ToList();
+
+            // Retrieve users and their assigned roles
+            var userRoles = _context.UserRoles
+                .Join(
+                    _context.Users,
+                    userRole => userRole.UserId,
+                    user => user.Id,
+                    (userRole, user) => new UserRole
+                    {
+                        UserId = user.Id,
+                        UserName = user.UserName,
+                        RoleId = userRole.RoleId
+                    }
+                ).ToList();
+
+            return View(new RoleClaimViewmodel()
+            {
+                RoleAndClaims = roleClaims,
+                UserRoles = userRoles,
+                Users = _context.Users
+                
+            });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AssignRole(Guid userId, Guid roleId)
+        {
+            if (userId == Guid.Empty || roleId == Guid.Empty)
+            {
+                return BadRequest("User ID and Role ID must be provided.");
+            }
+
+            var userRole = new IdentityUserRole<Guid>
+            {
+                UserId = userId,
+                RoleId = roleId
+            };
+
+            _context.UserRoles.Add(userRole);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Roles));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateUserRole(Guid userId, Guid roleId)
+        {
+            if (userId == Guid.Empty || roleId == Guid.Empty)
+            {
+                return BadRequest("User ID and Role ID must be provided.");
+            }
+
+            var existingUserRole = _context.UserRoles.FirstOrDefault(ur => ur.UserId == userId);
+            if (existingUserRole == null) 
+            {
+                return NotFound("User role assignment not found.");
+            }
+            _context.UserRoles.Remove(existingUserRole);
+            await _context.SaveChangesAsync();
+
+            existingUserRole.RoleId = roleId;
+            _context.UserRoles.Add(existingUserRole);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Roles));
         }
 
         [HttpPost]
